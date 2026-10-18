@@ -13,6 +13,14 @@ Project documentation for the **AI Car Theft Analytics** Power BI report.
 | **Built with** | Power BI Desktop, Power Query (M), DAX, Claude Code |
 | **Published** | Microsoft Fabric — `sample` workspace |
 
+## Report preview
+
+| Overview | Regions |
+|---|---|
+| ![Overview: headline KPIs, daily trend, regions treemap](screenshots/1-overview.png) | ![Regions: total thefts vs theft rate per 100K, scorecard](screenshots/2-regions.png) |
+| **Vehicles** | **Time Patterns** |
+| ![Vehicles: most stolen makes, body types, colours and model decades](screenshots/3-vehicles.png) | ![Time Patterns: monthly trend, weekday profile, weekday x month heatmap](screenshots/4-time-patterns.png) |
+
 ---
 
 ## 1. Data sources
@@ -153,6 +161,7 @@ AI Car Theft Analytics/
 ├── Data/                                ← source CSV files
 ├── _brief/                              ← report spec + page generator script
 ├── LinkedIn/                            ← architecture and showcase graphics
+├── screenshots/                         ← report page previews
 └── README.md                            ← this document
 ```
 
