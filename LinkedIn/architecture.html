@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project Architecture</title>
+<style>
+  :root {
+    --navy: #0F1A30; --navy2: #13213C; --card: #16233F; --card2: #1B2B4C; --line: rgba(255,255,255,.12);
+    --text: #F3F6FB; --soft: #C9D4E6; --muted: #8C9AB5;
+    --human: #2DD4BF; --human-bg: rgba(45,212,191,.10); --human-bd: rgba(45,212,191,.45);
+    --claude: #D97757; --claude-bg: rgba(217,119,87,.12); --claude-bd: rgba(217,119,87,.55);
+    --gold: #F2C811; --crimson: #E63946;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(700px 420px at 100% 0%, rgba(217,119,87,.20), transparent 60%),
+      radial-gradient(700px 520px at 0% 30%, rgba(45,212,191,.14), transparent 60%),
+      linear-gradient(170deg, #0B1428 0%, #13213C 60%, #0E1830 100%);
+    color: var(--text); font-family: 'Segoe UI', sans-serif;
+  }
+  .wrap { padding: 44px 48px 36px; height: 100%; display: flex; flex-direction: column; }
+  .pills { display: flex; gap: 10px; }
+  .pill { font: 700 12px/1 'Segoe UI'; letter-spacing: .14em; text-transform: uppercase; padding: 8px 13px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); color: var(--soft); }
+  .pill.hot { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+  h1 { font: 400 46px/1.08 Georgia, serif; margin-top: 16px; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, #2DD4BF, #93C5FD 45%, #D97757); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { margin-top: 8px; font: 400 16.5px/1.45 'Segoe UI'; color: var(--soft); }
+
+  .grid { margin-top: 22px; display: grid; grid-template-columns: 232px 1fr 232px; column-gap: 16px; }
+  .lanehead { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; margin-bottom: 8px; }
+  .lanehead.h { background: var(--human-bg); border: 1px solid var(--human-bd); }
+  .lanehead.c { background: var(--claude-bg); border: 1px solid var(--claude-bd); }
+  .lanehead b { font: 600 16px 'Segoe UI'; display: block; }
+  .lanehead span { font: 700 10.5px 'Segoe UI'; letter-spacing: .14em; text-transform: uppercase; }
+  .lanehead.h span { color: var(--human); } .lanehead.c span { color: #F0A88C; }
+  .avatar { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; border: 2px solid var(--human); flex: 0 0 auto; background: #13213C; }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; object-position: 52% 34%; transform: scale(1.9); transform-origin: 52% 30%; }
+  .claudeicon { width: 46px; height: 46px; border-radius: 12px; background: #F5EFE6; display: grid; place-items: center; flex: 0 0 auto; }
+  .centerhead { text-align: center; align-self: center; font: 700 11px 'Segoe UI'; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+  .note { border-radius: 12px; padding: 11px 13px; font: 400 14.5px/1.38 'Segoe UI'; color: #E3E9F4; position: relative; align-self: center; }
+  .note b { color: #fff; font-weight: 600; }
+  .note.h { background: var(--human-bg); border: 1px solid var(--human-bd); }
+  .note.c { background: var(--claude-bg); border: 1px solid var(--claude-bd); }
+  .note.h::after, .note.c::before { content: ''; position: absolute; top: 50%; width: 16px; border-top: 2px dashed; }
+  .note.h::after { right: -17px; border-color: var(--human); }
+  .note.c::before { left: -17px; border-color: var(--claude); }
+  .note .tool { display: inline-block; margin-top: 6px; font: 700 10.5px 'Segoe UI'; letter-spacing: .06em; padding: 3px 7px; border-radius: 999px; background: rgba(217,119,87,.25); color: #FFD3C2; }
+  .empty { align-self: center; height: 0; }
+
+  .stage { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 15px; box-shadow: 0 10px 24px rgba(0,0,0,.30); }
+  .stage .hd { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .stage .num { width: 22px; height: 22px; border-radius: 50%; background: #24385F; font: 700 11px/22px 'Segoe UI'; text-align: center; color: #fff; flex: 0 0 auto; }
+  .stage h3 { font: 400 20px Georgia, serif; }
+  .stage .hd .logo { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font: 600 12.5px 'Segoe UI'; padding: 6px 9px; border-radius: 7px; background: var(--card2); color: var(--soft); border: 1px solid rgba(255,255,255,.08); }
+  .chip i { font-style: normal; color: #fff; }
+  .arrow { height: 34px; display: grid; place-items: center; }
+  .arrow svg { display: block; }
+  .pages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .pg { background: #E9E4DA; border-radius: 6px; height: 64px; padding: 4px; position: relative; overflow: hidden; }
+  .pg::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 7px; background: #13213C; }
+  .pg i { position: absolute; bottom: 6px; left: 6px; right: 6px; font: 700 9.5px 'Segoe UI'; color: #1F1E1D; font-style: normal; }
+  .pg b { position: absolute; top: 13px; left: 6px; right: 6px; height: 22px; border-radius: 2px; }
+  .ship { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .shipbox { display: flex; gap: 10px; align-items: center; padding: 10px 11px; border-radius: 10px; background: var(--card2); border: 1px solid rgba(255,255,255,.08); }
+  .shipbox.next { border: 1.5px dashed rgba(45,212,191,.6); }
+  .shipbox.live { border: 1.5px solid rgba(45,212,191,.75); background: rgba(45,212,191,.10); }
+  .shipbox b { font: 600 14px 'Segoe UI'; display: block; } .shipbox span { font: 400 11.5px 'Segoe UI'; color: var(--muted); }
+
+  .result { margin-top: 22px; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(255,255,255,.14); border-radius: 14px; overflow: hidden; background: rgba(255,255,255,.03); }
+  .result div { padding: 12px 16px; border-right: 1px solid rgba(255,255,255,.10); }
+  .result div:last-child { border-right: 0; }
+  .result strong { font: 400 30px/1 Cambria, Georgia, serif; display: block; }
+  .result span { font: 600 11px 'Segoe UI'; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--line); }
+  .legend { display: flex; gap: 18px; font: 600 12px 'Segoe UI'; color: var(--soft); }
+  .legend span { display: inline-flex; gap: 7px; align-items: center; }
+  .legend i { width: 18px; border-top: 2px dashed; display: inline-block; }
+  .me { text-align: right; } .me b { font: 600 15px 'Segoe UI'; display: block; } .me span { font: 400 12px 'Segoe UI'; color: var(--muted); }
+</style>
+</head>
+<body>
+<!-- reusable logo symbols (simplified vector marks) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="pbi1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7D84A"/><stop offset="1" stop-color="#E8A800"/></linearGradient>
+    <linearGradient id="pbi2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2C811"/><stop offset="1" stop-color="#C98F00"/></linearGradient>
+    <linearGradient id="fab1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1DB7A0"/><stop offset="1" stop-color="#0A7F6E"/></linearGradient>
+    <linearGradient id="fab2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5BE3B5"/><stop offset="1" stop-color="#1FA88A"/></linearGradient>
+    <linearGradient id="fab3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9AF0CF"/><stop offset="1" stop-color="#46C99F"/></linearGradient>
+    <symbol id="powerbi" viewBox="0 0 32 32"><rect x="4" y="16" width="7" height="13" rx="2" fill="url(#pbi1)" opacity=".8"/><rect x="12.5" y="10" width="7" height="19" rx="2" fill="url(#pbi1)" opacity=".9"/><rect x="21" y="3" width="7" height="26" rx="2" fill="url(#pbi2)"/></symbol>
+    <symbol id="fabric" viewBox="0 0 32 32"><path d="M9 4 h17 l-4 7 h-17 z" fill="url(#fab3)"/><path d="M7 12.5 h15 l-4 7 h-15 z" fill="url(#fab2)"/><path d="M5 21 h9 l-4 7 h-9 z" fill="url(#fab1)"/></symbol>
+    <symbol id="claude" viewBox="0 0 32 32"><g fill="#D97757" transform="translate(16 16)">
+      <path d="M-1.6 -14 L1.6 -14 L1 -2 L-1 -2 Z"/><path d="M-1.4 -13 L1.4 -13 L0.9 -2 L-0.9 -2 Z" transform="rotate(32)"/><path d="M-1.6 -14.5 L1.6 -14.5 L1 -2 L-1 -2 Z" transform="rotate(64)"/>
+      <path d="M-1.4 -12 L1.4 -12 L0.9 -2 L-0.9 -2 Z" transform="rotate(95)"/><path d="M-1.6 -14 L1.6 -14 L1 -2 L-1 -2 Z" transform="rotate(127)"/><path d="M-1.4 -13 L1.4 -13 L0.9 -2 L-0.9 -2 Z" transform="rotate(160)"/>
+      <path d="M-1.6 -14.5 L1.6 -14.5 L1 -2 L-1 -2 Z" transform="rotate(192)"/><path d="M-1.4 -12.5 L1.4 -12.5 L0.9 -2 L-0.9 -2 Z" transform="rotate(224)"/><path d="M-1.6 -14 L1.6 -14 L1 -2 L-1 -2 Z" transform="rotate(256)"/>
+      <path d="M-1.4 -13 L1.4 -13 L0.9 -2 L-0.9 -2 Z" transform="rotate(288)"/><path d="M-1.6 -12.5 L1.6 -12.5 L1 -2 L-1 -2 Z" transform="rotate(320)"/><circle r="3"/></g></symbol>
+    <symbol id="csv" viewBox="0 0 32 32"><path d="M8 3 h11 l6 6 v20 h-17 z" fill="#E8F5E9"/><path d="M19 3 v6 h6" fill="#B7DFBB"/><rect x="6" y="15" width="16" height="9" rx="2" fill="#1E8E3E"/><text x="14" y="22" font-family="Segoe UI" font-weight="700" font-size="6.5" fill="#fff" text-anchor="middle">CSV</text></symbol>
+    <symbol id="pq" viewBox="0 0 32 32"><rect x="3" y="5" width="26" height="22" rx="4" fill="#1F7A4D"/><path d="M8 11 h16 l-6 7 v6 l-4 -2 v-4 z" fill="#E7F7EE"/></symbol>
+    <symbol id="git" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#F3F6FB"/><circle cx="11" cy="10" r="2.6" fill="#0F1A30"/><circle cx="11" cy="22" r="2.6" fill="#0F1A30"/><circle cx="21" cy="14" r="2.6" fill="#0F1A30"/><path d="M11 12.6 v6.8 M21 16.6 c0 3 -5 3 -8.3 4.4" stroke="#0F1A30" stroke-width="2" fill="none"/></symbol>
+    <symbol id="down" viewBox="0 0 20 22"><path d="M10 0 v16" stroke="#93C5FD" stroke-width="2.4"/><path d="M3 12 l7 8 l7 -8" fill="none" stroke="#93C5FD" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="pills"><span class="pill hot">Project architecture</span><span class="pill">Human + AI</span><span class="pill">Live on Microsoft Fabric</span></div>
+  <h1>How it was built: <em>who did what</em></h1>
+  <p class="sub">New Zealand vehicle-theft analysis: 4,553 records from 3 CSV files to a 5-page Power BI report. I set the direction and designed the model; Claude Code did the hands-on build.</p>
+
+  <div class="grid">
+    <!-- lane headers -->
+    <div class="lanehead h"><div class="avatar"><img src="avatar/photo.jpg" alt=""></div><div><span>The human</span><b>Harpal Sinh Jhala</b></div></div>
+    <div class="centerhead">The data pipeline</div>
+    <div class="lanehead c"><div class="claudeicon"><svg width="34" height="34"><use href="#claude"/></svg></div><div><span>The AI</span><b>Claude Code</b></div></div>
+
+    <!-- 1 data -->
+    <div class="note h"><b>Brought the dataset</b> and set the goal: a CV-ready theft analysis</div>
+    <div class="stage">
+      <div class="hd"><div class="num">1</div><h3>Raw data</h3><div class="logo"><svg width="28" height="28"><use href="#csv"/></svg></div></div>
+      <div class="chips"><span class="chip"><i>stolen_vehicles</i> · 4,553 rows</span><span class="chip"><i>make_details</i> · 138</span><span class="chip"><i>locations</i> · 16</span></div>
+    </div>
+    <div class="note c"><b>Profiled the CSVs</b>: blanks, date range, orphan keys</div>
+
+    <div></div><div class="arrow"><svg width="20" height="22"><use href="#down"/></svg></div><div></div>
+
+    <!-- 2 power query -->
+    <div class="empty"></div>
+    <div class="stage">
+      <div class="hd"><div class="num">2</div><h3>Power Query (M)</h3><div class="logo"><svg width="28" height="28"><use href="#pq"/></svg></div></div>
+      <div class="chips"><span class="chip">Data Folder parameter</span><span class="chip">Blanks → "Unknown"</span><span class="chip">Typed &amp; renamed</span></div>
+    </div>
+    <div class="note c"><b>Wrote the M queries</b> and cleaning steps</div>
+
+    <div></div><div class="arrow"><svg width="20" height="22"><use href="#down"/></svg></div><div></div>
+
+    <!-- 3 semantic model -->
+    <div class="note h"><b>Designed the semantic model</b>: star schema, a dedicated measures folder, optimisation rules</div>
+    <div class="stage">
+      <div class="hd"><div class="num">3</div><h3>Semantic model</h3><div class="logo"><svg width="28" height="28"><use href="#powerbi"/></svg></div></div>
+      <svg width="100%" height="124" viewBox="0 0 460 104">
+        <g stroke="#5EEAD4" stroke-width="1.5" stroke-opacity=".6">
+          <line x1="230" y1="52" x2="70" y2="20"/><line x1="230" y1="52" x2="70" y2="84"/><line x1="230" y1="52" x2="390" y2="20"/><line x1="230" y1="52" x2="390" y2="84"/>
+        </g>
+        <g font-family="Segoe UI" text-anchor="middle">
+          <rect x="185" y="34" width="90" height="36" rx="8" fill="#14B8A6"/><text x="230" y="50" font-size="12" font-weight="700" fill="#06261F">Thefts</text><text x="230" y="63" font-size="8.5" fill="#06261F">fact · 4,553 rows</text>
+          <g fill="#1B2B4C" stroke="#5EEAD4"><rect x="20" y="6" width="100" height="28" rx="7"/><rect x="20" y="70" width="100" height="28" rx="7"/><rect x="340" y="6" width="100" height="28" rx="7"/><rect x="340" y="70" width="100" height="28" rx="7"/></g>
+          <g font-size="11" font-weight="600" fill="#E6FFFA"><text x="70" y="24">Vehicle</text><text x="70" y="88">Location</text><text x="390" y="24">Make</text><text x="390" y="88">Date</text></g>
+          <rect x="173" y="80" width="114" height="20" rx="10" fill="#F2C811"/><text x="230" y="94" font-size="10" font-weight="700" fill="#3A2C00">28 DAX measures</text>
+        </g>
+      </svg>
+    </div>
+    <div class="note c"><b>Built it</b>: tables, relationships, 28 DAX measures; tested each with DAX queries<br><span class="tool">POWER BI MODELING MCP</span></div>
+
+    <div></div><div class="arrow"><svg width="20" height="22"><use href="#down"/></svg></div><div></div>
+
+    <!-- 4 report -->
+    <div class="note h"><b>Art-directed the report</b>: navigation, plain-English titles, colours, fonts and layout, over several review rounds</div>
+    <div class="stage">
+      <div class="hd"><div class="num">4</div><h3>Power BI report · 5 pages</h3><div class="logo"><svg width="28" height="28"><use href="#powerbi"/></svg></div></div>
+      <div class="pages">
+        <div class="pg"><b style="background:linear-gradient(90deg,#A9BEE6,#2F6FDE)"></b><i>Overview</i></div>
+        <div class="pg"><b style="background:linear-gradient(90deg,#D62839 55%,#0E9384 55%)"></b><i>Regions</i></div>
+        <div class="pg"><b style="background:linear-gradient(90deg,#D62839,#24385F)"></b><i>Vehicles</i></div>
+        <div class="pg"><b style="background:linear-gradient(90deg,#FBEDEA,#E5484D)"></b><i>Time</i></div>
+        <div class="pg"><b style="background:#FDFBF7;border:1px solid #DCD4C4"></b><i>About</i></div>
+      </div>
+    </div>
+    <div class="note c"><b>Generated the pages</b> and custom theme; validated and screenshot-checked each one<br><span class="tool">REPORT AUTHORING CLI · PBIR</span></div>
+
+    <div></div><div class="arrow"><svg width="20" height="22"><use href="#down"/></svg></div><div></div>
+
+    <!-- 5 ship -->
+    <div class="note h"><b>Published &amp; shares it</b>: Fabric workspace, GitHub repo and this LinkedIn story</div>
+    <div class="stage">
+      <div class="hd"><div class="num">5</div><h3>Ship</h3></div>
+      <div class="ship">
+        <div class="shipbox"><svg width="34" height="34"><use href="#git"/></svg><div><b>GitHub</b><span>PBIP + TMDL in git</span></div></div>
+        <div class="shipbox live"><svg width="34" height="34"><use href="#fabric"/></svg><div><b>Microsoft Fabric</b><span>Published · sample workspace</span></div></div>
+      </div>
+    </div>
+    <div class="note c"><b>Wrote the README</b> and set up the git repo</div>
+  </div>
+
+  <div class="result">
+    <div><strong style="color:#5EEAD4">4,553</strong><span>Records modelled</span></div>
+    <div><strong style="color:#F2C811">28</strong><span>DAX measures</span></div>
+    <div><strong style="color:#93C5FD">5</strong><span>Report pages</span></div>
+    <div><strong style="color:#F0A88C">2.3×</strong><span>Theft growth found</span></div>
+  </div>
+
+  <div class="foot">
+    <div class="legend"><span><i style="border-color:#2DD4BF"></i>Human: direction &amp; design</span><span><i style="border-color:#D97757"></i>AI: build &amp; validation</span></div>
+    <div class="me"><b>Harpal Sinh Jhala</b><span>github.com/harpalsinhjhala13/AI-Car-Theft-Analytics</span></div>
+  </div>
+</div>
+</body>
+</html>

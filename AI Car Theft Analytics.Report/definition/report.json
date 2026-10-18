@@ -11,7 +11,7 @@
       "type": "SharedResources"
     },
     "customTheme": {
-      "name": "TheftAnalyticsLight-92ea6090.json",
+      "name": "TheftAnalyticsWarm-f54dc5d7.json",
       "reportVersionAtImport": {
         "visual": "2.13.0",
         "report": "3.4.0",
@@ -43,6 +43,13 @@
                 "Value": "false"
               }
             }
+          },
+          "expanded": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
           }
         }
       }
@@ -65,8 +72,8 @@
       "type": "RegisteredResources",
       "items": [
         {
-          "name": "TheftAnalyticsLight-92ea6090.json",
-          "path": "TheftAnalyticsLight-92ea6090.json",
+          "name": "TheftAnalyticsWarm-f54dc5d7.json",
+          "path": "TheftAnalyticsWarm-f54dc5d7.json",
           "type": "CustomTheme"
         }
       ]

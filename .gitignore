@@ -5,3 +5,10 @@
 # Local-only folders
 _backup/
 .claude/
+
+# Personal photo and render frames (not for the public repo)
+LinkedIn/avatar/photo.jpg
+LinkedIn/avatar/frames/
+
+# Personal avatar assets (contain a photo)
+LinkedIn/avatar/

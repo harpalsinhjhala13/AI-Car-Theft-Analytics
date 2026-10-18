@@ -2,6 +2,8 @@
 
 Project documentation for the **AI Car Theft Analytics** Power BI report.
 
+![Project architecture: who did what](LinkedIn/architecture.png)
+
 | | |
 |---|---|
 | **Purpose** | Show how many vehicles were stolen in New Zealand, where, which vehicles, and when |
@@ -9,6 +11,7 @@ Project documentation for the **AI Car Theft Analytics** Power BI report.
 | **Data period** | 7 Oct 2021 – 6 Apr 2022 (Oct 2021 and Apr 2022 are partial months) |
 | **Format** | Power BI Project (PBIP) — report in PBIR, model in TMDL |
 | **Built with** | Power BI Desktop, Power Query (M), DAX, Claude Code |
+| **Published** | Microsoft Fabric — `sample` workspace |
 
 ---
 
@@ -92,14 +95,14 @@ Time-intelligence measures return blank for dates after the last recorded theft,
 
 | # | Page | Question answered | Main visuals |
 |---|---|---|---|
-| 1 | Theft Overview | How many vehicles were stolen, and is it growing? | 6 KPI cards, daily trend area chart, region treemap, standard vs luxury donut, vehicle types bar, monthly column |
-| 2 | Regional Hotspots | Where are vehicles being stolen? | Thefts by region, thefts per 100K by region, population vs thefts scatter, regional scorecard table |
-| 3 | Vehicles Targeted | Which vehicles do thieves target? | 6 KPI cards, top 15 makes, top 8 types, top 8 colours, model decade |
+| 1 | Overview | How many vehicles were stolen, and is it getting worse? | 6 KPI cards, daily trend area chart, region treemap, standard vs luxury donut, vehicle types bar, monthly column |
+| 2 | Regions | Where in New Zealand are vehicles being stolen? | Total thefts by region, theft rate per 100K, population vs thefts scatter, regional scorecard |
+| 3 | Vehicles | Which vehicles do thieves target? | 6 KPI cards, top 15 makes, top 8 types, top 8 colours, model decade |
 | 4 | Time Patterns | When do thefts happen? | Monthly thefts + MoM % combo, average per weekday, weekday × month heatmap |
-| 5 | About the Project | How was this built? | Overview, method, key findings, tools |
+| 5 | About | How was this built? | Overview, method, key findings, tools |
 
 **Slicers:** Region and Make Type (Vehicle Type on page 2). Slicers filter their own page only.
-**Navigation:** page-navigator tabs in the top banner on every page.
+**Navigation:** an Apple-style segmented page switcher in the top bar of every page.
 
 ---
 
@@ -117,11 +120,13 @@ Time-intelligence measures return blank for dates after the last recorded theft,
 | Element | Standard |
 |---|---|
 | Canvas | 1920 × 1080 |
-| Theme | `TheftAnalyticsLight` (custom JSON in `StaticResources/RegisteredResources`) |
-| Background / cards | Warm stone `#E9E4DA` / ivory `#FDFBF7`, soft drop shadow |
-| Banner | Navy `#13213C` with crimson accent line |
-| Fonts | Georgia (headings), Cambria (KPI numbers), Segoe UI (body, labels) |
-| Colours | Crimson `#D62839`, Teal `#0E9384`, Blue `#2F6FDE`, Navy `#24385F`, Violet `#7A5AF8`, Amber `#F59E0B` |
+| Style | "Warm minimal": Claude-inspired palette and serif headlines, Apple-style cards and navigation |
+| Theme | `TheftAnalyticsWarm` (custom JSON in `StaticResources/RegisteredResources`) |
+| Background / cards | Ivory canvas `#F4F1EA`; white cards, 16 px radius, hairline border `#E9E5DC`, soft long shadow |
+| Top bar | White with hairline divider; segmented page switcher (track `#ECE8E0`, selected tab white) |
+| Fonts | Georgia (titles and headlines), Segoe UI Light (KPI numbers), Segoe UI / Semibold (body, labels) |
+| Colours | Terracotta `#D4693F`, Teal `#1F7A6E`, Ocean `#2F6BB3`, Amber `#D98E1F`, Plum `#7B5EA7`, Ink `#2B2B2A` |
+| Chart colour | Value gradients on bars and columns: the biggest value gets the deepest colour |
 | Accessibility | Alt text on every visual; exact numbers (no K/M rounding) on labels |
 
 ---
@@ -147,6 +152,7 @@ AI Car Theft Analytics/
 ├── AI Car Theft Analytics.SemanticModel/← data model (TMDL)
 ├── Data/                                ← source CSV files
 ├── _brief/                              ← report spec + page generator script
+├── LinkedIn/                            ← architecture and showcase graphics
 └── README.md                            ← this document
 ```
 
@@ -158,3 +164,4 @@ AI Car Theft Analytics/
 - "Trailer" appears as both a make and a vehicle type in the source data.
 - Three regions (Tasman, Marlborough, West Coast) have no recorded thefts.
 - Population figures are static and don't change over the period.
+- The published Fabric report holds a data snapshot: the CSV source is on a local PC, so scheduled refresh in the service would need a gateway or moving the files to OneLake.
