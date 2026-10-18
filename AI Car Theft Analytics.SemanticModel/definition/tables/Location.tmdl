@@ -1,0 +1,54 @@
+/// Region dimension (New Zealand regions) with population and population density (people per square km).
+table Location
+	lineageTag: 58e75850-1547-467f-82b9-d9ea16e122b9
+
+	/// Unique ID of the region (primary key).
+	column 'Location ID'
+		dataType: int64
+		isHidden
+		lineageTag: 476694cf-cee3-47b3-8023-82d00aaf16cf
+		summarizeBy: none
+		sourceColumn: Location ID
+
+	/// New Zealand region where the theft was reported.
+	column Region
+		dataType: string
+		lineageTag: 80456ad3-720a-4144-b3ac-098a66490bb4
+		dataCategory: StateOrProvince
+		sourceColumn: Region
+
+	/// Country of the region (always New Zealand).
+	column Country
+		dataType: string
+		lineageTag: b49bb5aa-4c95-415c-a971-94c99d03370c
+		dataCategory: Country
+		sourceColumn: Country
+
+	/// Region population. Use the Population measure for totals.
+	column Population
+		dataType: int64
+		isHidden
+		formatString: #,##0
+		lineageTag: a696f86e-5377-4ac8-8558-de282b0d21c0
+		summarizeBy: none
+		sourceColumn: Population
+
+	/// People per square km in the region. Attribute, not additive.
+	column 'Population Density'
+		dataType: decimal
+		formatString: #,##0.00
+		lineageTag: 4f943968-da03-4260-986a-2112f74efd08
+		summarizeBy: none
+		sourceColumn: Population Density
+
+	partition Location = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(#"Data Folder" & "locations.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"location_id", Int64.Type}, {"region", type text}, {"country", type text}, {"population", Int64.Type}, {"density", Currency.Type}}, "en-US"),
+				    Renamed = Table.RenameColumns(Typed, {{"location_id", "Location ID"}, {"region", "Region"}, {"country", "Country"}, {"population", "Population"}, {"density", "Population Density"}})
+				in
+				    Renamed
+

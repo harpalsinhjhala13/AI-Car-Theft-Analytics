@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "AI Car Theft Analytics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "88a53741-9771-4acf-8787-ea1311cb150b"
+  }
+}

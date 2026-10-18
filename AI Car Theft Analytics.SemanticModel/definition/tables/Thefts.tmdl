@@ -1,0 +1,70 @@
+/// Fact table. One row per stolen vehicle (grain: vehicle theft event). Keys link to Vehicle, Make, Location and Date. Source: stolen_vehicles.csv.
+table Thefts
+	lineageTag: e59c9c5c-185c-4dce-a87a-ef38ea78d810
+
+	/// Foreign key to Vehicle.
+	column 'Vehicle ID'
+		dataType: int64
+		isHidden
+		isAvailableInMdx: false
+		lineageTag: d0ce166d-67ef-40f4-89fe-fe473425cd94
+		summarizeBy: none
+		sourceColumn: Vehicle ID
+
+	/// Foreign key to Make. -1 = make not recorded.
+	column 'Make ID'
+		dataType: double
+		isHidden
+		isAvailableInMdx: false
+		lineageTag: 3930b431-3756-4d17-a02c-7aa878513020
+		summarizeBy: none
+		sourceColumn: Make ID
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Foreign key to Location.
+	column 'Location ID'
+		dataType: int64
+		isHidden
+		isAvailableInMdx: false
+		lineageTag: d01dd639-f66c-457d-8a98-27843b28bf15
+		summarizeBy: none
+		sourceColumn: Location ID
+
+	/// Foreign key to Date. Date the vehicle was reported stolen.
+	column 'Date Stolen'
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		isAvailableInMdx: false
+		lineageTag: 678a1bc0-bdb7-4ef9-9b15-60fad93961f2
+		summarizeBy: none
+		sourceColumn: Date Stolen
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Year of theft minus model year. Blank when model year is unknown. Aggregated by the Average Vehicle Age measure.
+	column 'Vehicle Age at Theft'
+		dataType: int64
+		isHidden
+		isAvailableInMdx: false
+		lineageTag: 0240741a-674d-4ea3-a5c6-6420938f2111
+		summarizeBy: none
+		sourceColumn: Vehicle Age at Theft
+
+	partition Thefts = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(#"Data Folder" & "stolen_vehicles.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Selected = Table.SelectColumns(Promoted, {"vehicle_id", "make_id", "location_id", "date_stolen", "model_year"}),
+				    BlanksToNull = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"make_id", "model_year"}),
+				    Typed = Table.TransformColumnTypes(BlanksToNull, {{"vehicle_id", Int64.Type}, {"make_id", Int64.Type}, {"location_id", Int64.Type}, {"date_stolen", type date}, {"model_year", Int64.Type}}, "en-US"),
+				    UnknownMake = Table.ReplaceValue(Typed, null, -1, Replacer.ReplaceValue, {"make_id"}),
+				    AddAge = Table.AddColumn(UnknownMake, "Vehicle Age at Theft", each if [model_year] = null then null else Date.Year([date_stolen]) - [model_year], Int64.Type),
+				    Removed = Table.RemoveColumns(AddAge, {"model_year"}),
+				    Renamed = Table.RenameColumns(Removed, {{"vehicle_id", "Vehicle ID"}, {"make_id", "Make ID"}, {"location_id", "Location ID"}, {"date_stolen", "Date Stolen"}})
+				in
+				    Renamed
+

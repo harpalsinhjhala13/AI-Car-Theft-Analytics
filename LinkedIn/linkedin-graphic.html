@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LinkedIn Graphic</title>
+<style>
+  :root {
+    --navy: #0F1A30; --navy2: #13213C; --navy3: #24385F; --crimson: #E63946; --crimson2: #D62839;
+    --teal: #14B8A6; --teal2: #0E9384; --blue: #3B82F6; --violet: #8B5CF6; --amber: #F59E0B;
+    --stone: #E9E4DA; --ivory: #FDFBF7; --ink: #1F1E1D; --muted: #8C9AB5; --line: rgba(255,255,255,.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(900px 520px at 85% -5%, rgba(230,57,70,.22), transparent 60%),
+      radial-gradient(800px 600px at -10% 105%, rgba(20,184,166,.18), transparent 60%),
+      linear-gradient(160deg, #0B1428 0%, #13213C 55%, #0E1830 100%);
+    color: #fff; font-family: 'Segoe UI', sans-serif; position: relative;
+  }
+  .grid { position: absolute; inset: 0; background-image:
+      linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 54px 54px; opacity: .35; mask-image: linear-gradient(180deg, #000 0%, transparent 55%); }
+  .wrap { position: relative; padding: 52px 56px 44px; height: 100%; display: flex; flex-direction: column; }
+
+  .pills { display: flex; gap: 10px; align-items: center; }
+  .pill { font: 600 13px/1 'Segoe UI'; letter-spacing: .14em; text-transform: uppercase; padding: 9px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.18); color: #C9D4E6; }
+  .pill.hot { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+
+  h1 { font: 400 52px/1.06 Georgia, serif; margin-top: 18px; letter-spacing: -.5px; }
+  h1 .b { color: #fff; }
+  h1 .f { background: linear-gradient(90deg, #FF8A65, #E63946 45%, #C084FC); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { margin-top: 12px; font: 400 18px/1.42 'Segoe UI'; color: #C9D4E6; max-width: 900px; }
+  .sub b { color: #fff; font-weight: 600; }
+
+  /* dashboard mock */
+  .screen { flex-shrink: 0; margin-top: 22px; border-radius: 16px; background: #0A1222; padding: 0 0 0; border: 1px solid rgba(255,255,255,.14);
+    box-shadow: 0 30px 60px rgba(0,0,0,.45), 0 0 0 6px rgba(255,255,255,.03); overflow: hidden; }
+  .chrome { height: 28px; display: flex; align-items: center; gap: 7px; padding: 0 14px; background: #0A1222; }
+  .chrome i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+  .chrome span { margin-left: 12px; font: 500 11px 'Segoe UI'; color: #8C9AB5; }
+  .banner { height: 40px; background: var(--navy2); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 3px solid var(--crimson2); }
+  .banner .t { font: 400 15px Georgia, serif; }
+  .banner .t small { display: block; font: 400 8.5px 'Segoe UI'; color: #9FB0CC; margin-top: 1px; }
+  .tabs { display: flex; gap: 5px; }
+  .tabs b { font: 600 8.5px 'Segoe UI'; padding: 5px 9px; border-radius: 999px; border: 1px solid var(--navy3); color: #C9D4E6; }
+  .tabs b.on { background: #fff; color: var(--navy2); border-color: #fff; }
+  .page { background: var(--stone); padding: 10px 12px 12px; color: var(--ink); }
+  .ph { display: flex; align-items: center; gap: 8px; }
+  .ph .bar { width: 4px; height: 26px; background: var(--crimson2); border-radius: 2px; }
+  .ph h3 { font: 400 14px Georgia, serif; }
+  .ph p { font: 600 8px 'Segoe UI'; color: #6B655B; } .ph p em { color: var(--crimson2); font-style: normal; }
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 8px; }
+  .kpi { background: var(--ivory); border-radius: 6px; padding: 6px 8px; border-left: 3px solid var(--c); box-shadow: 0 2px 6px rgba(74,63,46,.14); }
+  .kpi small { font: 600 7.5px 'Segoe UI'; color: #6B655B; display: block; }
+  .kpi strong { font: 400 19px Cambria, Georgia, serif; }
+  .row { display: grid; gap: 7px; margin-top: 7px; }
+  .card { background: var(--ivory); border-radius: 6px; padding: 7px 9px; box-shadow: 0 2px 6px rgba(74,63,46,.14); position: relative; }
+  .card h4 { font: 400 10px Georgia, serif; } .card h4 + p { font: 400 6.5px 'Segoe UI'; color: #6B655B; margin-bottom: 3px; }
+  .tm { display: grid; grid-template-columns: 1.45fr 1fr .75fr .55fr; grid-template-rows: 1fr .8fr; gap: 2px; height: 116px; }
+  .tm div { color: #fff; font: 600 7px 'Segoe UI'; padding: 3px 4px; border-radius: 2px; }
+
+  /* human vs ai */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; flex-shrink: 0; }
+  .who { border-radius: 18px; padding: 18px 22px 14px; position: relative; overflow: hidden; }
+  .who.h { background: linear-gradient(160deg, rgba(20,184,166,.18), rgba(20,184,166,.04)); border: 1px solid rgba(20,184,166,.45); }
+  .who.a { background: linear-gradient(160deg, rgba(230,57,70,.20), rgba(139,92,246,.06)); border: 1px solid rgba(230,57,70,.45); }
+  .tag { display: inline-flex; align-items: center; gap: 8px; font: 700 12px 'Segoe UI'; letter-spacing: .14em; text-transform: uppercase; }
+  .who.h .tag { color: #5EEAD4; } .who.a .tag { color: #FF8A8F; }
+  .tag .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; }
+  .who h2 { font: 400 27px/1.15 Georgia, serif; margin: 8px 0 4px; }
+  .who .by { font: 600 14px 'Segoe UI'; color: #C9D4E6; margin-bottom: 12px; }
+  .who ul { list-style: none; }
+  .who li { font: 400 14.5px/1.35 'Segoe UI'; color: #E3E9F4; padding: 4px 0 4px 22px; position: relative; }
+  .who li::before { content: ''; position: absolute; left: 2px; top: 10px; width: 9px; height: 9px; border-radius: 2px; transform: rotate(45deg); }
+  .who.h li::before { background: var(--teal); } .who.a li::before { background: var(--crimson); }
+  .who li b { color: #fff; font-weight: 600; }
+  .schema { position: absolute; right: 14px; top: 14px; opacity: .95; }
+  .plus { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 46px; height: 46px; border-radius: 50%;
+    background: #0E1830; border: 1px solid rgba(255,255,255,.25); display: grid; place-items: center; font: 300 28px 'Segoe UI'; color: #fff; z-index: 2; }
+
+  .stats { flex-shrink: 0; margin-top: 16px; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(255,255,255,.14); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,.03); }
+  .stat { padding: 12px 18px; border-right: 1px solid rgba(255,255,255,.10); }
+  .stat:last-child { border-right: 0; }
+  .stat strong { font: 400 34px/1 Cambria, Georgia, serif; display: block; }
+  .stat span { font: 600 12px 'Segoe UI'; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .stat:nth-child(1) strong { color: #FF8A8F; } .stat:nth-child(2) strong { color: #5EEAD4; } .stat:nth-child(3) strong { color: #93C5FD; } .stat:nth-child(4) strong { color: #C4B5FD; }
+
+  .insights { margin-top: 16px; flex-shrink: 0; }
+  .ins-k { font: 700 12px 'Segoe UI'; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .ins-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .ins { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.10); }
+  .ins strong { font: 400 30px/1 Cambria, Georgia, serif; white-space: nowrap; }
+  .ins span { font: 400 13px/1.35 'Segoe UI'; color: #C9D4E6; }
+  .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; padding-top: 16px; }
+  .me { display: flex; align-items: center; gap: 14px; }
+  .avatar { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--crimson), var(--violet)); display: grid; place-items: center; font: 400 19px Georgia, serif; }
+  .me b { font: 600 18px 'Segoe UI'; display: block; } .me span { font: 400 13px 'Segoe UI'; color: var(--muted); }
+  .flow { font: 600 12px 'Segoe UI'; letter-spacing: .06em; color: #9FB0CC; text-align: right; }
+  .flow em { font-style: normal; color: #fff; }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="wrap">
+  <div class="pills">
+    <span class="pill hot">Portfolio project</span>
+    <span class="pill">Power BI × Claude Code</span>
+    <span class="pill">4,553 vehicle thefts</span>
+  </div>
+
+  <h1><span class="b">I built the brain.</span><br><span class="f">AI built the face.</span></h1>
+  <p class="sub">An end-to-end <b>New Zealand vehicle-theft analysis</b>: 3 raw CSV files turned into a semantic model and a five-page Power BI report, with <b>me designing the data model</b> and <b>Claude Code</b> building the report.</p>
+
+  <!-- dashboard mock -->
+  <div class="screen">
+    <div class="chrome"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i><span>AI Car Theft Analytics.pbip — Power BI Desktop</span></div>
+    <div class="banner">
+      <div class="t">New Zealand Vehicle Theft Analysis<small>4,553 vehicles reported stolen to NZ Police · Oct 2021 – Apr 2022 · 16 regions</small></div>
+      <div class="tabs"><b class="on">Theft Overview</b><b>Regional Hotspots</b><b>Vehicles Targeted</b><b>Time Patterns</b><b>About</b></div>
+    </div>
+    <div class="page">
+      <div class="ph"><div class="bar"></div><div><h3>How many vehicles were stolen, and is the problem growing?</h3><p><em>Key insight:</em> Monthly thefts more than doubled, from 464 in Oct 2021 to 1,053 in Mar 2022.</p></div></div>
+      <div class="kpis">
+        <div class="kpi" style="--c:#D62839"><small>Vehicles stolen</small><strong>4,553</strong></div>
+        <div class="kpi" style="--c:#2F6FDE"><small>Avg. thefts per day</small><strong>25.0</strong></div>
+        <div class="kpi" style="--c:#F59E0B"><small>Most in one day</small><strong>83</strong></div>
+        <div class="kpi" style="--c:#0E9384"><small>Per 100K people</small><strong>88.9</strong></div>
+        <div class="kpi" style="--c:#7A5AF8"><small>Luxury share</small><strong>4.17%</strong></div>
+        <div class="kpi" style="--c:#24385F"><small>Avg. vehicle age</small><strong>16.4</strong></div>
+      </div>
+      <div class="row" style="grid-template-columns: 1.55fr 1fr;">
+        <div class="card"><h4>Daily thefts are trending upward</h4><p>Daily thefts and 7-day rolling average</p><svg id="area" width="100%" height="104" viewBox="0 0 560 104" preserveAspectRatio="none" style="height:116px"></svg></div>
+        <div class="card"><h4>Where thefts happen</h4><p>Box size = number of thefts</p>
+          <div class="tm">
+            <div style="background:#24385F;grid-row:1/3">Auckland<br>1,638</div>
+            <div style="background:#0E9384">Canterbury<br>660</div>
+            <div style="background:#7A5AF8">Wellington</div>
+            <div style="background:#B54708">Waikato</div>
+            <div style="background:#2F6FDE">Bay of Plenty</div>
+            <div style="background:#0B7285">Gisborne</div>
+            <div style="background:#C11574">N…</div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="grid-template-columns: .8fr 1.1fr 1.1fr;">
+        <div class="card" style="display:flex;align-items:center;gap:8px;"><svg width="64" height="64" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#24385F" stroke-width="6"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#7A5AF8" stroke-width="6" stroke-dasharray="4.2 95.8" stroke-dashoffset="25"/><text x="21" y="24" text-anchor="middle" font-family="Cambria" font-size="7.5" fill="#1F1E1D">4,553</text></svg><div><h4>Standard vs luxury</h4><p>Only 4.2% are luxury makes</p></div></div>
+        <div class="card"><h4>Most stolen vehicle types</h4><svg width="100%" height="50" viewBox="0 0 300 50" id="bars"></svg></div>
+        <div class="card"><h4>Thefts by month</h4><svg width="100%" height="50" viewBox="0 0 300 50" id="cols"></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- human + ai -->
+  <div class="duo" style="position:relative;">
+    <div class="who h">
+      <svg class="schema" width="92" height="80" viewBox="0 0 92 80">
+        <g stroke="#5EEAD4" stroke-width="1.4" opacity=".7"><line x1="46" y1="40" x2="14" y2="12"/><line x1="46" y1="40" x2="78" y2="12"/><line x1="46" y1="40" x2="14" y2="68"/><line x1="46" y1="40" x2="78" y2="68"/></g>
+        <rect x="31" y="30" width="30" height="20" rx="4" fill="#14B8A6"/><text x="46" y="43.5" text-anchor="middle" font-size="8" font-family="Segoe UI" font-weight="700" fill="#06261F">FACT</text>
+        <g fill="#0E1830" stroke="#5EEAD4"><rect x="2" y="4" width="24" height="16" rx="3"/><rect x="66" y="4" width="24" height="16" rx="3"/><rect x="2" y="60" width="24" height="16" rx="3"/><rect x="66" y="60" width="24" height="16" rx="3"/></g>
+        <g font-size="6" font-family="Segoe UI" fill="#CCFBF1" text-anchor="middle"><text x="14" y="14.5">Vehicle</text><text x="78" y="14.5">Make</text><text x="14" y="70.5">Location</text><text x="78" y="70.5">Date</text></g>
+      </svg>
+      <span class="tag"><span class="dot"></span>The human</span>
+      <h2>Semantic<br>modelling</h2>
+      <div class="by">Harpal Sinh Jhala</div>
+      <ul>
+        <li><b>Star schema</b>: 1 fact + 4 dimensions</li>
+        <li><b>28 DAX measures</b> in 6 display folders</li>
+        <li>Time intelligence, rates per 100K, rankings</li>
+        <li>Optimised: hidden keys, no implicit measures</li>
+      </ul>
+    </div>
+    <div class="plus">+</div>
+    <div class="who a">
+      <span class="tag"><span class="dot"></span>The AI</span>
+      <h2>Power BI design<br>&amp; KPIs</h2>
+      <div class="by">Claude Code</div>
+      <ul>
+        <li><b>5 storytelling pages</b> with tab navigation</li>
+        <li>KPI cards, treemap, donut, heatmap, scatter</li>
+        <li>Custom theme: serif type, soft shadows</li>
+        <li>Validated &amp; screenshot-reviewed in Desktop</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><strong>4,553</strong><span>Records analysed</span></div>
+    <div class="stat"><strong>28</strong><span>DAX measures</span></div>
+    <div class="stat"><strong>5</strong><span>Report pages</span></div>
+    <div class="stat"><strong>1</strong><span>Star schema</span></div>
+  </div>
+
+  <div class="insights">
+    <div class="ins-k">What the data revealed</div>
+    <div class="ins-row">
+      <div class="ins"><strong style="color:#FF8A8F">2.3×</strong><span>Monthly thefts grew from 464 to 1,053 in five months</span></div>
+      <div class="ins"><strong style="color:#5EEAD4">338</strong><span>Thefts per 100K people in Gisborne, the highest rate (Auckland has the most)</span></div>
+      <div class="ins"><strong style="color:#C4B5FD">4.2%</strong><span>Only this share were luxury cars; Toyota, stationwagons &amp; silver lead</span></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="me"><div class="avatar">H</div><div><b>Harpal Sinh Jhala</b><span>linkedin.com/in/harpal-sinh-jhala</span></div></div>
+    <div class="flow">CSV <em>→</em> Power Query <em>→</em> Semantic model <em>→</em> Power BI report</div>
+  </div>
+</div>
+
+<script>
+  // Area chart: daily thefts (light) + 7-day average (blue), shaped like the real data (rising, late-March spike)
+  const n = 180, W = 560, H = 104;
+  let daily = [], avg = [];
+  let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    let base = 16 + 14 * t + (t > 0.88 ? (t - 0.88) * 260 : 0);
+    if (i > n - 4) base -= (i - (n - 4)) * 18;
+    daily.push(Math.max(4, base + (rnd() - 0.5) * 16));
+  }
+  for (let i = 0; i < n; i++) { const s = daily.slice(Math.max(0, i - 6), i + 1); avg.push(s.reduce((a, b) => a + b, 0) / s.length); }
+  const max = Math.max(...daily) * 1.05, x = (i) => (i / (n - 1)) * W, y = (v) => H - (v / max) * (H - 4);
+  const line = (arr) => arr.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const area = (arr) => `${line(arr)} L${W},${H} L0,${H} Z`;
+  document.getElementById('area').innerHTML =
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F6FDE" stop-opacity=".45"/><stop offset="1" stop-color="#2F6FDE" stop-opacity=".05"/></linearGradient></defs>
+     <path d="${area(daily)}" fill="#A9BEE6" opacity=".55"/>
+     <path d="${area(avg)}" fill="url(#g)"/>
+     <path d="${line(avg)}" fill="none" stroke="#2F6FDE" stroke-width="2.2"/>`;
+
+  // Bars: vehicle types
+  const types = [['Stationwagon', 945], ['Saloon', 851], ['Hatchback', 644], ['Trailer', 582], ['Utility', 466]];
+  document.getElementById('bars').innerHTML = types.map(([k, v], i) =>
+    `<text x="58" y="${i * 10 + 8}" font-size="6.5" text-anchor="end" fill="#55504A" font-family="Segoe UI">${k}</text>
+     <rect x="62" y="${i * 10 + 2}" width="${v / 945 * 200}" height="7" rx="1" fill="#24385F"/>
+     <text x="${66 + v / 945 * 200}" y="${i * 10 + 8}" font-size="6.5" fill="#1F1E1D" font-family="Segoe UI" font-weight="600">${v}</text>`).join('');
+
+  // Columns: months
+  const months = [['Oct', 464], ['Nov', 560], ['Dec', 644], ['Jan', 740], ['Feb', 763], ['Mar', 1053], ['Apr', 329]];
+  document.getElementById('cols').innerHTML = months.map(([k, v], i) => {
+    const h = v / 1053 * 34, xx = 12 + i * 41;
+    return `<rect x="${xx}" y="${42 - h}" width="22" height="${h}" rx="1.5" fill="#0E9384"/>
+            <text x="${xx + 11}" y="${40 - h}" font-size="6" text-anchor="middle" fill="#1F1E1D" font-family="Segoe UI" font-weight="600">${v.toLocaleString('en-US')}</text>
+            <text x="${xx + 11}" y="49" font-size="6" text-anchor="middle" fill="#55504A" font-family="Segoe UI">${k}</text>`;
+  }).join('');
+</script>
+</body>
+</html>

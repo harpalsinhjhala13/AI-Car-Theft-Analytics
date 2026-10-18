@@ -1,0 +1,48 @@
+/// Vehicle make (manufacturer) dimension with make type (Standard or Luxury). Includes an 'Unknown' member (Make ID -1) for thefts with no recorded make.
+table Make
+	lineageTag: ba7c1bc1-dbe7-4278-b991-910c8e4edf19
+
+	/// Unique ID of the make (primary key). -1 = Unknown.
+	column 'Make ID'
+		dataType: int64
+		isHidden
+		lineageTag: 01514ff8-a0f9-4e31-bd0b-c83892654b46
+		summarizeBy: none
+		sourceColumn: Make ID
+
+	/// Vehicle manufacturer / brand name.
+	column 'Make Name'
+		dataType: string
+		lineageTag: b4a2bfd6-4673-46b0-9a30-c0d0fa2e0c99
+		sourceColumn: Make Name
+
+	/// Make category: Standard or Luxury ('Unknown' when make not recorded).
+	column 'Make Type'
+		dataType: string
+		lineageTag: b2acc914-c9a3-4bc9-8376-b5b81137fcd3
+		sourceColumn: Make Type
+
+	/// Drill path Make Type > Make Name.
+	hierarchy 'Make Hierarchy'
+		lineageTag: f5486075-2d18-4b93-800d-4985525e707d
+
+		level 'Make Type'
+			lineageTag: a6618b11-5fa6-4bbb-a859-9af2e32b980a
+			column: 'Make Type'
+
+		level Make
+			lineageTag: fd7fd60b-30e3-49a6-b172-34cd38d0f274
+			column: 'Make Name'
+
+	partition Make = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(#"Data Folder" & "make_details.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Promoted, {{"make_id", Int64.Type}, {"make_name", type text}, {"make_type", type text}}, "en-US"),
+				    AddUnknown = Table.InsertRows(Typed, 0, {[make_id = -1, make_name = "Unknown", make_type = "Unknown"]}),
+				    Renamed = Table.RenameColumns(AddUnknown, {{"make_id", "Make ID"}, {"make_name", "Make Name"}, {"make_type", "Make Type"}})
+				in
+				    Renamed
+

@@ -1,0 +1,26 @@
+/// AI Car Theft Analytics: New Zealand vehicle thefts (Oct 2021 - Apr 2022). Star schema with Thefts fact and Vehicle, Make, Location, Date dimensions; all measures live in Key Measures.
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_ProTooling = ["DevMode","MCP-PBIModeling"]
+
+annotation PBI_QueryOrder = ["Thefts","Vehicle","Make","Location","Date","Key Measures","Data Folder"]
+
+ref table Thefts
+ref table Vehicle
+ref table Make
+ref table Location
+ref table Date
+ref table 'Key Measures'
+
+ref cultureInfo en-US
+

@@ -1,0 +1,60 @@
+/// Vehicle dimension. One row per stolen vehicle with its descriptive attributes (type, description, colour, model year). Blank text values are shown as 'Unknown'.
+table Vehicle
+	lineageTag: b0911218-86ad-4e9b-bfe6-20fe9e536b3d
+
+	/// Unique ID of the stolen vehicle (primary key).
+	column 'Vehicle ID'
+		dataType: int64
+		isHidden
+		lineageTag: 70d2da9d-0324-4664-85a4-15ead997e904
+		summarizeBy: none
+		sourceColumn: Vehicle ID
+
+	/// Body/vehicle type, e.g. Stationwagon, Saloon, Trailer. 'Unknown' when not recorded.
+	column 'Vehicle Type'
+		dataType: string
+		lineageTag: f0ab215c-1eb8-463e-a50a-fdae257d1878
+		sourceColumn: Vehicle Type
+
+	/// Free-text model description recorded by police, e.g. HILUX, COURIER. 'Unknown' when not recorded.
+	column 'Vehicle Description'
+		dataType: string
+		lineageTag: b03ac628-577d-4f57-9edc-e87558cf6330
+		sourceColumn: Vehicle Description
+
+	/// Vehicle colour. 'Unknown' when not recorded.
+	column Color
+		dataType: string
+		lineageTag: 52558ce5-0e46-44f8-aa98-f05d68dc6f32
+		sourceColumn: Color
+
+	/// Model year of the vehicle. Blank when not recorded.
+	column 'Model Year'
+		dataType: int64
+		formatString: 0
+		lineageTag: abe9e3b2-e6d2-42f8-9730-44a86f440aaa
+		summarizeBy: none
+		sourceColumn: Model Year
+
+	/// Decade of the model year, e.g. 2000s. 'Unknown' when model year is missing.
+	column 'Model Decade'
+		dataType: string
+		lineageTag: f5967a9e-f7d2-424b-b76e-a50a0f66bc5e
+		sourceColumn: Model Decade
+
+	partition Vehicle = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(#"Data Folder" & "stolen_vehicles.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Selected = Table.SelectColumns(Promoted, {"vehicle_id", "vehicle_type", "vehicle_desc", "color", "model_year"}),
+				    BlankYear = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"model_year"}),
+				    UnknownText = Table.ReplaceValue(BlankYear, "", "Unknown", Replacer.ReplaceValue, {"vehicle_type", "vehicle_desc", "color"}),
+				    Trimmed = Table.TransformColumns(UnknownText, {{"vehicle_type", Text.Trim, type text}, {"vehicle_desc", Text.Trim, type text}, {"color", Text.Trim, type text}}),
+				    Typed = Table.TransformColumnTypes(Trimmed, {{"vehicle_id", Int64.Type}, {"model_year", Int64.Type}}, "en-US"),
+				    AddDecade = Table.AddColumn(Typed, "Model Decade", each if [model_year] = null then "Unknown" else Text.From(Number.IntegerDivide([model_year], 10) * 10) & "s", type text),
+				    Renamed = Table.RenameColumns(AddDecade, {{"vehicle_id", "Vehicle ID"}, {"vehicle_type", "Vehicle Type"}, {"vehicle_desc", "Vehicle Description"}, {"color", "Color"}, {"model_year", "Model Year"}})
+				in
+				    Renamed
+

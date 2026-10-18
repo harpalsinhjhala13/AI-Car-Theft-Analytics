@@ -1,0 +1,242 @@
+/// Dedicated home for all report measures, organised in display folders. Contains no data.
+table 'Key Measures'
+	lineageTag: dec23260-c888-4fd3-9344-71010e385f6d
+
+	/// Number of vehicles reported stolen in the current filter context. Base measure for all other theft calculations.
+	measure 'Total Thefts' = COUNTROWS ( 'Thefts' )
+		formatString: #,##0
+		displayFolder: 1. Theft Volume
+		lineageTag: f80a206e-b07d-4c48-bfd9-ccde7ac06eff
+
+	/// Thefts of vehicles whose make is classified as Luxury.
+	measure 'Luxury Thefts' = CALCULATE ( [Total Thefts], KEEPFILTERS ( 'Make'[Make Type] = "Luxury" ) )
+		formatString: #,##0
+		displayFolder: 1. Theft Volume
+		lineageTag: bce6fd9d-589d-489c-b231-d101db77e0dc
+
+	/// Thefts of vehicles whose make is classified as Standard.
+	measure 'Standard Thefts' = CALCULATE ( [Total Thefts], KEEPFILTERS ( 'Make'[Make Type] = "Standard" ) )
+		formatString: #,##0
+		displayFolder: 1. Theft Volume
+		lineageTag: bf9636ec-2f1b-40d1-8849-9b35c24dd398
+
+	/// Thefts reported on a Saturday or Sunday.
+	measure 'Weekend Thefts' = CALCULATE ( [Total Thefts], KEEPFILTERS ( 'Date'[Is Weekend] = "Yes" ) )
+		formatString: #,##0
+		displayFolder: 1. Theft Volume
+		lineageTag: 5bc8bc73-1dac-4b0a-a10d-f536a3ffc5bf
+
+	/// Share of thefts in the current row/segment relative to the total of everything selected on the page (respects slicers).
+	measure '% of Total Thefts' = DIVIDE ( [Total Thefts], CALCULATE ( [Total Thefts], ALLSELECTED () ) )
+		formatString: 0.00%
+		displayFolder: 2. Share and Mix
+		lineageTag: ff394d97-60bd-4ec0-a3aa-b48f36ff7b0c
+
+	/// Proportion of thefts that are luxury makes.
+	measure 'Luxury Theft %' = DIVIDE ( [Luxury Thefts], [Total Thefts] )
+		formatString: 0.00%
+		displayFolder: 2. Share and Mix
+		lineageTag: 2fcf1636-2219-4b59-9042-2631740fb73b
+
+	/// Proportion of thefts reported on weekends (2 of 7 days = 28.57% would be an even spread).
+	measure 'Weekend Theft %' = DIVIDE ( [Weekend Thefts], [Total Thefts] )
+		formatString: 0.00%
+		displayFolder: 2. Share and Mix
+		lineageTag: cd3655a4-0059-4735-b588-d8488adf1e88
+
+	/// Earliest theft date in the current filter context.
+	measure 'First Theft Date' = MIN ( 'Thefts'[Date Stolen] )
+		formatString: yyyy-mm-dd
+		displayFolder: 3. Daily Activity
+		lineageTag: cbaccd02-9a6a-4b87-b863-87c1f731ac63
+
+	/// Most recent theft date in the current filter context.
+	measure 'Latest Theft Date' = MAX ( 'Thefts'[Date Stolen] )
+		formatString: yyyy-mm-dd
+		displayFolder: 3. Daily Activity
+		lineageTag: 6fcc642a-cdc7-4890-abc8-a404f186136a
+
+	/// Thefts divided by the number of calendar days in context that fall inside the recorded data window (first to last theft date), so days with zero thefts are included and days outside the data window are not.
+	measure 'Average Daily Thefts' =
+			VAR _firstDate = CALCULATE ( MIN ( 'Thefts'[Date Stolen] ), REMOVEFILTERS () )
+			VAR _lastDate = CALCULATE ( MAX ( 'Thefts'[Date Stolen] ), REMOVEFILTERS () )
+			VAR _days =
+			    COUNTROWS (
+			        FILTER ( VALUES ( 'Date'[Date] ), 'Date'[Date] >= _firstDate && 'Date'[Date] <= _lastDate )
+			    )
+			RETURN
+			    DIVIDE ( [Total Thefts], _days )
+		formatString: #,##0.0
+		displayFolder: 3. Daily Activity
+		lineageTag: 2b81263f-a507-4c98-ac4d-56bb83963b27
+
+	/// Highest number of thefts recorded on a single day in the current context.
+	measure 'Peak Daily Thefts' = MAXX ( VALUES ( 'Date'[Date] ), [Total Thefts] )
+		formatString: #,##0
+		displayFolder: 3. Daily Activity
+		lineageTag: 80be9f85-ccb7-4dfe-9d1d-f818ef9d3d39
+
+	/// Month-to-date thefts. Blank for dates after the last recorded theft.
+	measure 'Thefts MTD' =
+			VAR _lastDataDate = CALCULATE ( MAX ( 'Thefts'[Date Stolen] ), REMOVEFILTERS () )
+			RETURN
+			    IF ( MIN ( 'Date'[Date] ) <= _lastDataDate, CALCULATE ( [Total Thefts], DATESMTD ( 'Date'[Date] ) ) )
+		formatString: #,##0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 86604fc7-794e-4be3-a1ce-84d49928ea9f
+
+	/// Calendar year-to-date thefts. Blank for dates after the last recorded theft.
+	measure 'Thefts YTD' =
+			VAR _lastDataDate = CALCULATE ( MAX ( 'Thefts'[Date Stolen] ), REMOVEFILTERS () )
+			RETURN
+			    IF ( MIN ( 'Date'[Date] ) <= _lastDataDate, CALCULATE ( [Total Thefts], DATESYTD ( 'Date'[Date] ) ) )
+		formatString: #,##0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 48ac9f8e-ef66-418e-95e7-1749c0f3404d
+
+	/// Cumulative thefts from the start of the data up to the last date in context (not reset by year).
+	measure 'Thefts Running Total' =
+			VAR _lastDataDate = CALCULATE ( MAX ( 'Thefts'[Date Stolen] ), REMOVEFILTERS () )
+			VAR _maxDate = MAX ( 'Date'[Date] )
+			RETURN
+			    IF (
+			        MIN ( 'Date'[Date] ) <= _lastDataDate,
+			        CALCULATE ( [Total Thefts], REMOVEFILTERS ( 'Date' ), 'Date'[Date] <= _maxDate )
+			    )
+		formatString: #,##0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 168076b4-0366-4866-b121-1e24e88ef85f
+
+	/// Thefts in the same period shifted back one month. Blank for periods after the last recorded theft. Use with a month-level Date column.
+	measure 'Thefts Previous Month' =
+			VAR _lastDataDate = CALCULATE ( MAX ( 'Thefts'[Date Stolen] ), REMOVEFILTERS () )
+			RETURN
+			    IF ( MIN ( 'Date'[Date] ) <= _lastDataDate, CALCULATE ( [Total Thefts], DATEADD ( 'Date'[Date], -1, MONTH ) ) )
+		formatString: #,##0
+		displayFolder: 4. Time Intelligence
+		lineageTag: e0b4e8fb-1f46-455e-8c8c-d1381105e312
+
+	/// Month-over-month change in thefts (current minus previous month). Blank when either month has no data.
+	measure 'Thefts MoM Change' =
+			VAR _current = [Total Thefts]
+			VAR _previous = [Thefts Previous Month]
+			RETURN
+			    IF ( NOT ISBLANK ( _current ) && NOT ISBLANK ( _previous ), _current - _previous )
+		formatString: +#,##0;-#,##0;0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 585df0ea-e75d-49eb-bea5-5838c8b3e56d
+
+	/// Month-over-month growth rate in thefts. Note: Oct 2021 and Apr 2022 are partial months in the source data.
+	measure 'Thefts MoM %' =
+			VAR _previous = [Thefts Previous Month]
+			RETURN
+			    DIVIDE ( [Thefts MoM Change], _previous )
+		formatString: +0.00%;-0.00%;0.00%
+		displayFolder: 4. Time Intelligence
+		lineageTag: e2dc9653-41af-4cca-a944-48932fb31d2f
+
+	/// Average thefts per day over the 7 days ending on the last date in context, capped at the last recorded theft date (zero-theft days count as 0). Best used on a daily axis.
+	measure 'Thefts 7-Day Rolling Average' =
+			VAR _lastDataDate = CALCULATE ( MAX ( 'Thefts'[Date Stolen] ), REMOVEFILTERS () )
+			VAR _anchorDate = MIN ( MAX ( 'Date'[Date] ), _lastDataDate )
+			RETURN
+			    IF (
+			        MIN ( 'Date'[Date] ) <= _lastDataDate,
+			        DIVIDE ( CALCULATE ( [Total Thefts], DATESINPERIOD ( 'Date'[Date], _anchorDate, -7, DAY ) ), 7 )
+			    )
+		formatString: #,##0.0
+		displayFolder: 4. Time Intelligence
+		lineageTag: 918c4057-cb1d-4b78-97a7-f507f4a21647
+
+	/// Total population of the regions in the current filter context.
+	measure Population = SUM ( 'Location'[Population] )
+		formatString: #,##0
+		displayFolder: 5. Location
+		lineageTag: da5bc17c-5da2-4a3f-b050-ef5206875a5e
+
+	/// Theft rate normalised by population: thefts per 100,000 residents. Use to compare regions of different size.
+	measure 'Thefts per 100K Population' = DIVIDE ( [Total Thefts], [Population] ) * 100000
+		formatString: #,##0.0
+		displayFolder: 5. Location
+		lineageTag: 7783dccf-49f0-4123-847e-3733b75a43db
+
+	/// Rank of the region by number of thefts (1 = most thefts) among the selected regions. Blank when Region is not on the visual.
+	measure 'Region Theft Rank' =
+			IF (
+			    ISINSCOPE ( 'Location'[Region] ),
+			    RANKX ( ALLSELECTED ( 'Location'[Region] ), [Total Thefts], , DESC, DENSE )
+			)
+		formatString: 0
+		displayFolder: 5. Location
+		lineageTag: bfa2824d-97bd-47b9-834d-3303f041835f
+
+	/// Region with the most thefts in the current context (ties are comma-separated). Useful for card visuals.
+	measure 'Top Region' =
+			VAR _top = TOPN ( 1, VALUES ( 'Location'[Region] ), [Total Thefts], DESC )
+			RETURN
+			    IF ( NOT ISBLANK ( [Total Thefts] ), CONCATENATEX ( _top, 'Location'[Region], ", ", 'Location'[Region], ASC ) )
+		displayFolder: 5. Location
+		lineageTag: cc56bdbf-9e88-4ddb-8ef9-28ba933bbe07
+
+	/// Average age in years of stolen vehicles at the time of theft (theft year minus model year). Vehicles with unknown model year are excluded.
+	measure 'Average Vehicle Age' = AVERAGE ( 'Thefts'[Vehicle Age at Theft] )
+		formatString: #,##0.0
+		displayFolder: 6. Vehicle and Make
+		lineageTag: b2d14ead-e4be-4f8a-8a8e-984c281d18e7
+
+	/// Number of distinct known makes with at least one theft.
+	measure 'Makes Stolen' = CALCULATE ( DISTINCTCOUNT ( 'Thefts'[Make ID] ), KEEPFILTERS ( 'Thefts'[Make ID] <> -1 ) )
+		formatString: #,##0
+		displayFolder: 6. Vehicle and Make
+		lineageTag: 19621373-72a3-4fc5-9ef8-47ea09f6ce07
+
+	/// Rank of the make by number of thefts (1 = most stolen) among the selected makes. Blank when Make Name is not on the visual.
+	measure 'Make Theft Rank' =
+			IF (
+			    ISINSCOPE ( 'Make'[Make Name] ),
+			    RANKX ( ALLSELECTED ( 'Make'[Make Name] ), [Total Thefts], , DESC, DENSE )
+			)
+		formatString: 0
+		displayFolder: 6. Vehicle and Make
+		lineageTag: 71821489-b795-4647-92ba-86b49d1abf3d
+
+	/// Make with the most thefts in the current context (ties are comma-separated).
+	measure 'Top Stolen Make' =
+			VAR _top = TOPN ( 1, VALUES ( 'Make'[Make Name] ), [Total Thefts], DESC )
+			RETURN
+			    IF ( NOT ISBLANK ( [Total Thefts] ), CONCATENATEX ( _top, 'Make'[Make Name], ", ", 'Make'[Make Name], ASC ) )
+		displayFolder: 6. Vehicle and Make
+		lineageTag: 019df8d1-7476-42d2-bc8e-94712f7e4b70
+
+	/// Vehicle type with the most thefts in the current context (ties are comma-separated).
+	measure 'Top Stolen Vehicle Type' =
+			VAR _types = CALCULATETABLE ( VALUES ( 'Vehicle'[Vehicle Type] ), 'Thefts' )
+			VAR _top = TOPN ( 1, _types, [Total Thefts], DESC )
+			RETURN
+			    IF ( NOT ISBLANK ( [Total Thefts] ), CONCATENATEX ( _top, 'Vehicle'[Vehicle Type], ", ", 'Vehicle'[Vehicle Type], ASC ) )
+		displayFolder: 6. Vehicle and Make
+		lineageTag: 867d3ce4-ac1a-42c4-a704-812591495454
+
+	/// Vehicle colour with the most thefts in the current context (ties are comma-separated).
+	measure 'Top Stolen Color' =
+			VAR _colors = CALCULATETABLE ( VALUES ( 'Vehicle'[Color] ), 'Thefts' )
+			VAR _top = TOPN ( 1, _colors, [Total Thefts], DESC )
+			RETURN
+			    IF ( NOT ISBLANK ( [Total Thefts] ), CONCATENATEX ( _top, 'Vehicle'[Color], ", ", 'Vehicle'[Color], ASC ) )
+		displayFolder: 6. Vehicle and Make
+		lineageTag: df714647-b95f-4f3a-8275-763582696926
+
+	column Placeholder
+		dataType: string
+		isHidden
+		lineageTag: fe67a8a6-ec23-4360-8859-90fd583fc0fd
+		sourceColumn: Placeholder
+
+	partition 'Key Measures' = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [Placeholder = text], {})
+				in
+				    Source
+

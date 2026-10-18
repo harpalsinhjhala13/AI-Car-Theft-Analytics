@@ -1,0 +1,183 @@
+/// Calendar dimension. One row per day, contiguous, covering full calendar years from the first to the last theft date in stolen_vehicles.csv. Weeks start on Monday.
+table Date
+	lineageTag: 7f943a79-67ca-4e54-88b1-a77e69ffb1e1
+	dataCategory: Time
+
+	/// Calendar date (primary key of the Date table).
+	column Date
+		dataType: dateTime
+		isUnique
+		formatString: yyyy-mm-dd
+		lineageTag: 08115764-c15d-423e-b924-08becbedb567
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Calendar year.
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 73d3bc71-ab08-4736-90e9-16b92a09b9ed
+		summarizeBy: none
+		sourceColumn: Year
+
+	/// Quarter of year 1-4 (sort key for Quarter).
+	column 'Quarter Number'
+		dataType: int64
+		isHidden
+		lineageTag: c4a4bd25-d681-4c65-8e26-81bdb3259e32
+		summarizeBy: none
+		sourceColumn: Quarter Number
+
+	/// Quarter of year, Q1-Q4.
+	column Quarter
+		dataType: string
+		lineageTag: 646d76e6-e818-4edd-a0c9-e5dcdfac7b02
+		sourceColumn: Quarter
+		sortByColumn: 'Quarter Number'
+
+	/// Year and quarter, e.g. 2022 Q1.
+	column 'Year Quarter'
+		dataType: string
+		lineageTag: 91f47352-30b2-4096-a3e6-9cf8ea4e285b
+		sourceColumn: Year Quarter
+		sortByColumn: 'Year Quarter Number'
+
+	/// Sort key for Year Quarter (yyyyq).
+	column 'Year Quarter Number'
+		dataType: int64
+		isHidden
+		lineageTag: 20ca9bb6-5baf-4090-bbb0-0cdff97d5c4a
+		summarizeBy: none
+		sourceColumn: Year Quarter Number
+
+	/// Month of year 1-12.
+	column 'Month Number'
+		dataType: int64
+		lineageTag: 2bf4497d-2d5d-4e23-857b-99877befaaa4
+		summarizeBy: none
+		sourceColumn: Month Number
+
+	/// Full month name, sorted chronologically.
+	column 'Month Name'
+		dataType: string
+		lineageTag: e1b446fe-2e47-416b-a704-bf6a4718480b
+		sourceColumn: Month Name
+		sortByColumn: 'Month Number'
+
+	/// Three-letter month name, sorted chronologically.
+	column 'Month Short'
+		dataType: string
+		lineageTag: f2f5b2c8-f543-4104-b766-ef06abe70ea2
+		sourceColumn: Month Short
+		sortByColumn: 'Month Number'
+
+	/// Month and year, e.g. Jan 2022, sorted chronologically.
+	column 'Year Month'
+		dataType: string
+		lineageTag: 061066df-9e16-4e7a-9939-055976c389e8
+		sourceColumn: Year Month
+		sortByColumn: 'Year Month Number'
+
+	/// Sort key for Year Month (yyyymm).
+	column 'Year Month Number'
+		dataType: int64
+		isHidden
+		lineageTag: 0e94291e-8d4d-4d58-ad84-eb2b57534037
+		summarizeBy: none
+		sourceColumn: Year Month Number
+
+	/// Week number of the year, weeks starting Monday.
+	column 'Week of Year'
+		dataType: int64
+		lineageTag: 5e280feb-54e9-45d8-98fe-729ca8afbf43
+		summarizeBy: none
+		sourceColumn: Week of Year
+
+	/// Day of the month 1-31.
+	column 'Day of Month'
+		dataType: int64
+		lineageTag: 5b1bf3dd-0175-4e96-a407-48060be20979
+		summarizeBy: none
+		sourceColumn: Day of Month
+
+	/// Day of week 1 (Monday) to 7 (Sunday); sort key for day names.
+	column 'Day of Week Number'
+		dataType: int64
+		isHidden
+		lineageTag: 706a637d-0c66-42cd-99bf-1590b2a8a475
+		summarizeBy: none
+		sourceColumn: Day of Week Number
+
+	/// Full weekday name, Monday first.
+	column 'Day Name'
+		dataType: string
+		lineageTag: dcd4ada3-24e0-4c51-bfc9-95e9387e1776
+		sourceColumn: Day Name
+		sortByColumn: 'Day of Week Number'
+
+	/// Three-letter weekday name, Monday first.
+	column 'Day Short'
+		dataType: string
+		lineageTag: 3e7d8648-4ead-4411-9fdd-4a9832777cf4
+		sourceColumn: Day Short
+		sortByColumn: 'Day of Week Number'
+
+	/// Yes for Saturday and Sunday, otherwise No.
+	column 'Is Weekend'
+		dataType: string
+		lineageTag: 58cb3e68-fcaa-4842-b0a5-c93eba8ba9f8
+		sourceColumn: Is Weekend
+
+	/// Drill path Year > Quarter > Month > Date.
+	hierarchy 'Calendar Hierarchy'
+		lineageTag: b04fdeb6-cc03-4a6b-b37d-a2e8cfd042e2
+
+		level Year
+			lineageTag: 8a6bc9a3-b5d0-4f1a-acd1-3c92738d06d5
+			column: Year
+
+		level Quarter
+			lineageTag: 091252ac-bd3f-41de-b03f-40212d1c8da1
+			column: 'Year Quarter'
+
+		level Month
+			lineageTag: d58925f0-edf5-48b9-962a-115978b08e96
+			column: 'Year Month'
+
+		level Date
+			lineageTag: a23de087-5ad0-40f1-aa6d-7ebe110f71ff
+			column: Date
+
+	partition Date = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(#"Data Folder" & "stolen_vehicles.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Promoted = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Table.SelectColumns(Promoted, {"date_stolen"}), {{"date_stolen", type date}}, "en-US"),
+				    Dates = List.RemoveNulls(Typed[date_stolen]),
+				    StartDate = Date.StartOfYear(List.Min(Dates)),
+				    EndDate = Date.EndOfYear(List.Max(Dates)),
+				    DateList = List.Dates(StartDate, Duration.Days(EndDate - StartDate) + 1, #duration(1, 0, 0, 0)),
+				    DateTable = Table.FromList(DateList, Splitter.SplitByNothing(), type table [Date = date]),
+				    AddYear = Table.AddColumn(DateTable, "Year", each Date.Year([Date]), Int64.Type),
+				    AddQuarterNo = Table.AddColumn(AddYear, "Quarter Number", each Date.QuarterOfYear([Date]), Int64.Type),
+				    AddQuarter = Table.AddColumn(AddQuarterNo, "Quarter", each "Q" & Text.From([Quarter Number]), type text),
+				    AddYearQuarter = Table.AddColumn(AddQuarter, "Year Quarter", each Text.From([Year]) & " Q" & Text.From([Quarter Number]), type text),
+				    AddYearQuarterNo = Table.AddColumn(AddYearQuarter, "Year Quarter Number", each [Year] * 10 + [Quarter Number], Int64.Type),
+				    AddMonthNo = Table.AddColumn(AddYearQuarterNo, "Month Number", each Date.Month([Date]), Int64.Type),
+				    AddMonthName = Table.AddColumn(AddMonthNo, "Month Name", each Date.MonthName([Date], "en-US"), type text),
+				    AddMonthShort = Table.AddColumn(AddMonthName, "Month Short", each Text.Start(Date.MonthName([Date], "en-US"), 3), type text),
+				    AddYearMonth = Table.AddColumn(AddMonthShort, "Year Month", each Text.Start(Date.MonthName([Date], "en-US"), 3) & " " & Text.From([Year]), type text),
+				    AddYearMonthNo = Table.AddColumn(AddYearMonth, "Year Month Number", each [Year] * 100 + [Month Number], Int64.Type),
+				    AddWeek = Table.AddColumn(AddYearMonthNo, "Week of Year", each Date.WeekOfYear([Date], Day.Monday), Int64.Type),
+				    AddDay = Table.AddColumn(AddWeek, "Day of Month", each Date.Day([Date]), Int64.Type),
+				    AddDowNo = Table.AddColumn(AddDay, "Day of Week Number", each Date.DayOfWeek([Date], Day.Monday) + 1, Int64.Type),
+				    AddDayName = Table.AddColumn(AddDowNo, "Day Name", each Date.DayOfWeekName([Date], "en-US"), type text),
+				    AddDayShort = Table.AddColumn(AddDayName, "Day Short", each Text.Start(Date.DayOfWeekName([Date], "en-US"), 3), type text),
+				    AddWeekend = Table.AddColumn(AddDayShort, "Is Weekend", each if Date.DayOfWeek([Date], Day.Monday) >= 5 then "Yes" else "No", type text)
+				in
+				    AddWeekend
+

@@ -1,0 +1,16 @@
+relationship Thefts_Vehicle
+	fromColumn: Thefts.'Vehicle ID'
+	toColumn: Vehicle.'Vehicle ID'
+
+relationship Thefts_Make
+	fromColumn: Thefts.'Make ID'
+	toColumn: Make.'Make ID'
+
+relationship Thefts_Location
+	fromColumn: Thefts.'Location ID'
+	toColumn: Location.'Location ID'
+
+relationship Thefts_Date
+	fromColumn: Thefts.'Date Stolen'
+	toColumn: Date.Date
+

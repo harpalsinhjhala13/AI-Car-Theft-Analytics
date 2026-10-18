@@ -1,0 +1,6 @@
+/// Folder path that contains the source CSV files (must end with a backslash). Change this to repoint every table.
+expression 'Data Folder' = "C:\Users\Tnluser\Desktop\AI + Data\AI Car Theft Analytics\Data\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 47723a80-7877-48ad-bd70-185ed1ab1f96
+
+	annotation PBI_ResultType = Text
+
